@@ -45,6 +45,19 @@ public class Benchmark
         }
     }
 
+    [Benchmark(Description = "Linq")]
+    public void BenchLinq()
+    {
+        LinkedList<LinkedList<FooBar>> result = new LinkedList<LinkedList<FooBar>>();
+
+        foreach (var sampleSet in _randomSets)
+        {
+            result.AddLast(
+                new LinkedList<FooBar>(
+                    sampleSet.DistinctByWithMax(f => (f.Foo, f.Bar), f => f.Baz)));
+        }
+    }
+    
     [Benchmark(Description = "Sort")]
     public void BenchSort()
     {
@@ -67,7 +80,7 @@ public class Benchmark
         {
             result.AddLast(
                 new LinkedList<FooBar>(
-                    sampleSet.DistinctByWithMax(f => (f.Foo, f.Bar), f => f.Baz)));
+                    sampleSet.DistinctByWithMaxHash(f => (f.Foo, f.Bar), f => f.Baz)));
         }
     }
 }

@@ -3,6 +3,33 @@
 public static class DistinctByExtension
 {
     /// <summary>
+    /// Returns distinct elements from a sequence according to a specified key selector function and using a specified comparer to compare keys, with the remaining elements having the maximum keySort value. Facade containing a linq query. 
+    /// </summary>
+    /// <param name="source">The sequence to remove duplicate elements from.</param>
+    /// <param name="keySelector">A function to extract the key to distinguish for each element.</param>
+    /// <param name="keySort">A function to extract the key maximizing for each element.</param>
+    /// /// <param name="keySortComparer">An IComparer to compare maximizing keys.</param>
+    /// <param name="duplicateComparer">An IEqualityComparer to compare maximizing keys.</param>
+    /// <typeparam name="TSource">The type of elements of source.</typeparam>
+    /// <typeparam name="TKey">The type of key to distinguish elements by.</typeparam>
+    /// <typeparam name="TSort">The type of key to maximizing elements by.</typeparam>
+    /// <returns>An IEnumerable that contains distinct elements from the source sequence, with the elements having the maximum TSort value.</returns>
+    /// <exception cref="ArgumentException">source is null.</exception>
+    /// <remarks>This method is implemented by using deferred execution.
+    /// The immediate return value is an object that stores all the information that is required to perform the action.
+    /// The query represented by this method is not executed until the object is enumerated either by calling its GetEnumerator method directly or by using foreach in Visual C#.</remarks>
+    public static IEnumerable<TSource> DistinctByWithMax<TSource, TKey, TSort>(this IEnumerable<TSource> source,
+        Func<TSource, TKey> keySelector, Func<TSource, TSort> keySort,
+        IComparer<TSort>? keySortComparer = null, IEqualityComparer<TKey>? duplicateComparer = null)
+    {
+        if (source is null)
+            throw new ArgumentException("source is null.");
+
+        return source.GroupBy(keySelector, duplicateComparer)
+            .Select(g => g.OrderByDescending(keySort, keySortComparer).First());
+    }
+
+    /// <summary>
     /// Returns sorted distinct elements from a sequence according to a specified key selector function and using a specified comparer to compare keys, with the remaining elements having the maximum keySort value. 
     /// </summary>
     /// <param name="source">The sequence to remove duplicate elements from.</param>
@@ -52,7 +79,7 @@ public static class DistinctByExtension
     }
 
     /// <summary>
-    /// Returns sorted distinct elements from a sequence according to a specified key selector function and using a specified comparer to compare keys, with the remaining elements having the maximum keySort value. 
+    /// Returns sorted distinct elements from a sequence according to a specified key selector function and using a specified comparer to compare keys, with the remaining elements having the maximum keySort value. Explicitly uses a dictionary to find duplicates. 
     /// </summary>
     /// <param name="source">The sequence to remove duplicate elements from.</param>
     /// <param name="keySelector">A function to extract the key to distinguish for each element.</param>
@@ -64,7 +91,7 @@ public static class DistinctByExtension
     /// <typeparam name="TSort">The type of key to maximizing elements by.</typeparam>
     /// <returns>An IEnumerable that contains distinct elements from the source sequence, with the elements having the maximum TSort value.</returns>
     /// <exception cref="ArgumentException">source is null.</exception>
-    public static IEnumerable<TSource> DistinctByWithMax<TSource, TKey, TSort>(this IEnumerable<TSource> source,
+    public static IEnumerable<TSource> DistinctByWithMaxHash<TSource, TKey, TSort>(this IEnumerable<TSource> source,
         Func<TSource, TKey> keySelector, Func<TSource, TSort> keySort,
         IComparer<TSort>? keySortComparer = null, IEqualityComparer<TKey>? duplicateComparer = null)
         where TKey : notnull
